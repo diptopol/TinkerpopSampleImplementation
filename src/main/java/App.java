@@ -1,5 +1,6 @@
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class App {
 
     public static void main(String[] args) {
         tinkerGraphVertexCreationAndSearchExample();
-
+        tinkerGraphVertexEdgeCreationAndSearchExample();
     }
 
     /**
@@ -29,6 +30,29 @@ public class App {
                 .next();
 
         List<Object> outputList = g.V().has("name", "marko").values("age").toList();
+
+        for (Object output : outputList) {
+            System.out.println(output);
+        }
+    }
+
+    private static void tinkerGraphVertexEdgeCreationAndSearchExample() {
+        TinkerGraph tinkerGraph = TinkerGraph.open();
+        GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(tinkerGraph);
+
+        Vertex personVertex = g.addV("person")
+                .property("name", "marko")
+                .property("age", 30)
+                .next();
+
+        Vertex jobVertex = g.addV("job")
+                .property("name", "Software Engineer")
+                .property("company", "abcdefgh")
+                .next();
+
+        g.addE("works").from(personVertex).to(jobVertex).iterate();
+
+        List<Object> outputList = g.V().has("name", "marko").out("works").values("name").toList();
 
         for (Object output : outputList) {
             System.out.println(output);
