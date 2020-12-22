@@ -14,6 +14,7 @@ public class App {
     public static void main(String[] args) {
         tinkerGraphVertexCreationAndSearchExample();
         tinkerGraphVertexEdgeCreationAndSearchExample();
+        tinkerGraphVertexCreationFromGraphExample();
     }
 
     /**
@@ -60,5 +61,29 @@ public class App {
         for (Object output : outputList) {
             System.out.println(output);
         }
+    }
+
+    /**
+     * Vertex can also be added in TinkerGraph instead of using GraphTraversalSource and later can be searched using the
+     * GraphTraversalSource
+     */
+    private static void tinkerGraphVertexCreationFromGraphExample() {
+        TinkerGraph tinkerGraph = TinkerGraph.open();
+
+        Vertex person = tinkerGraph.addVertex("name", "marko");
+        Vertex job = tinkerGraph.addVertex("Job Position", "Software Engineer");
+
+        person.addEdge("works", job);
+
+        List<Object> outputList = tinkerGraph.traversal().V()
+                .has("name", "marko")
+                .out("works")
+                .values("Job Position")
+                .toList();
+
+        for (Object output : outputList) {
+            System.out.println(output);
+        }
+
     }
 }
