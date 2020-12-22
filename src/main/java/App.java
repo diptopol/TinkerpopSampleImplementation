@@ -1,4 +1,5 @@
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.IO;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
@@ -15,6 +16,8 @@ public class App {
         tinkerGraphVertexCreationAndSearchExample();
         tinkerGraphVertexEdgeCreationAndSearchExample();
         tinkerGraphVertexCreationFromGraphExample();
+        tinkerGraphSerializationExample();
+        tinkerGraphDeserializationExample();
     }
 
     /**
@@ -85,5 +88,42 @@ public class App {
             System.out.println(output);
         }
 
+    }
+
+    /**
+     * This method provides the example of serializing the graph in a file
+     */
+    private static void tinkerGraphSerializationExample() {
+        TinkerGraph tinkerGraph = TinkerGraph.open();
+
+        Vertex person = tinkerGraph.addVertex("name", "marko");
+        Vertex job = tinkerGraph.addVertex("Job Position", "Software Engineer");
+
+        person.addEdge("works", job);
+
+        tinkerGraph.traversal().io("resource\\graph.kryo")
+                .with(IO.writer, IO.gryo)
+                .write().iterate();
+    }
+
+    /**
+     * This method provides the example of de-serializing the graph from a file
+     */
+    private static void tinkerGraphDeserializationExample() {
+        TinkerGraph tinkerGraph = TinkerGraph.open();
+
+        tinkerGraph.traversal().io("resource\\graph.kryo")
+                .with(IO.reader, IO.gryo)
+                .read().iterate();
+
+        List<Object> outputList = tinkerGraph.traversal().V()
+                .has("name", "marko")
+                .out("works")
+                .values("Job Position")
+                .toList();
+
+        for (Object output : outputList) {
+            System.out.println(output);
+        }
     }
 }
