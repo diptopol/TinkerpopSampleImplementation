@@ -36,6 +36,9 @@ public class App {
         }
     }
 
+    /**
+     * This method creates two vertices and one edge and later search for particular out vertex property
+     */
     private static void tinkerGraphVertexEdgeCreationAndSearchExample() {
         TinkerGraph tinkerGraph = TinkerGraph.open();
         GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(tinkerGraph);
