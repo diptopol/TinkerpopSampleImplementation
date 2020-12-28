@@ -1,3 +1,4 @@
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.IO;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -18,6 +19,7 @@ public class App {
         tinkerGraphVertexCreationFromGraphExample();
         tinkerGraphSerializationExample();
         tinkerGraphDeserializationExample();
+        tinkerGraphProcessingInGremlinServer();
     }
 
     /**
@@ -124,6 +126,38 @@ public class App {
 
         for (Object output : outputList) {
             System.out.println(output);
+        }
+    }
+
+    /**
+     * This method connects to gremlin server to process the graph
+     */
+    private static void tinkerGraphProcessingInGremlinServer() {
+        GraphTraversalSource traversalSource = AnonymousTraversalSource.traversal()
+                .withRemote(DriverRemoteConnection.using("localhost", 8182, "g"));
+
+        Vertex personVertex = traversalSource.addV("person")
+                .property("name", "marko")
+                .property("age", 30)
+                .next();
+
+        Vertex jobVertex = traversalSource.addV("job")
+                .property("name", "Software Engineer")
+                .property("company", "abcdefgh")
+                .next();
+
+        traversalSource.addE("works").from(personVertex).to(jobVertex).iterate();
+
+        List<Object> outputList = traversalSource.V().has("name", "marko").out("works").values("name").toList();
+
+        for (Object output : outputList) {
+            System.out.println(output);
+        }
+
+        try {
+            traversalSource.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }
