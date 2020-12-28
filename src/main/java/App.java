@@ -20,6 +20,7 @@ public class App {
         tinkerGraphSerializationExample();
         tinkerGraphDeserializationExample();
         tinkerGraphProcessingInGremlinServer();
+        tinkerGraphVertexCreationIfNotExistsExample();
     }
 
     /**
@@ -158,6 +159,34 @@ public class App {
             traversalSource.close();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    /**
+     * This method check whether vertex exists before adding the vertex
+     */
+    private static void tinkerGraphVertexCreationIfNotExistsExample() {
+        TinkerGraph tinkerGraph = TinkerGraph.open();
+        GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(tinkerGraph);
+
+        g.addV("person")
+                .property("name", "marko")
+                .property("age", 30)
+                .next();
+
+        boolean isVertexExists = g.V().has("name", "marko").has("age", 30).toSet().size() > 0;
+
+        if (!isVertexExists) {
+            g.addV("person")
+                    .property("name", "marko")
+                    .property("age", 30)
+                    .next();
+        }
+
+        List<Object> outputList = g.V().has("name", "marko").values("age").toList();
+
+        for (Object output : outputList) {
+            System.out.println(output);
         }
     }
 }
