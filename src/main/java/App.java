@@ -9,6 +9,7 @@ import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Diptopol
@@ -25,6 +26,7 @@ public class App {
         tinkerGraphProcessingInGremlinServer();
         tinkerGraphVertexCreationIfNotExistsExample();
         tinkerGraphAddingListProperty();
+        tinkerGraphAddEdgeBasedOnPropertyValue();
     }
 
     /**
@@ -225,5 +227,40 @@ public class App {
 
             hobbiesOutput.forEach(System.out::println);
         });
+    }
+
+    /**
+     * This method adds edge between two vertices using the property value
+     */
+    private static void tinkerGraphAddEdgeBasedOnPropertyValue() {
+        TinkerGraph tinkerGraph = TinkerGraph.open();
+        GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(tinkerGraph);
+
+        g.addV("person")
+                .property("name", "marko")
+                .property("age", 30)
+                .property("son", "mar")
+                .next();
+
+        g.addV("person")
+                .property("name", "mar")
+                .property("age", 5)
+                .next();
+
+        Set<Vertex> vertexSet = g.V().has("name", "marko")
+                .has("son").toSet();
+
+        vertexSet.forEach(fromVertex -> {
+            String name = fromVertex.<String>property("son").value();
+            Set<Vertex> toVertexSet = g.V().has("name", name).toSet();
+
+            toVertexSet.forEach(toVertex -> g.addE("son").from(fromVertex).to(toVertex).iterate());
+        });
+
+        List<Integer> valueList = g.V().has("name", "marko").out("son").<Integer>values("age").toList();
+
+        for (Integer value : valueList) {
+            System.out.println(value);
+        }
     }
 }
