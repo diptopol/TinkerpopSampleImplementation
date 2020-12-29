@@ -3,8 +3,11 @@ import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.IO;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -21,6 +24,7 @@ public class App {
         tinkerGraphDeserializationExample();
         tinkerGraphProcessingInGremlinServer();
         tinkerGraphVertexCreationIfNotExistsExample();
+        tinkerGraphAddingListProperty();
     }
 
     /**
@@ -188,5 +192,38 @@ public class App {
         for (Object output : outputList) {
             System.out.println(output);
         }
+    }
+
+    /**
+     * This method saves multiple values in the property
+     */
+    private static void tinkerGraphAddingListProperty() {
+        TinkerGraph tinkerGraph = TinkerGraph.open();
+        GraphTraversalSource g = AnonymousTraversalSource.traversal().withEmbedded(tinkerGraph);
+
+        List<String> hobbies = new ArrayList<String>();
+        hobbies.add("Reading books");
+        hobbies.add("Playing Video Games");
+
+        Vertex v = g.addV("person")
+                .property("name", "marko")
+                .property("age", 30)
+                .next();
+
+        for (String hobby : hobbies) {
+            v.property(VertexProperty.Cardinality.list, "hobbies", hobby);
+        }
+
+        g.V().has("name", "marko").toStream().forEach(vertex -> {
+            Iterator<VertexProperty<String>> iterator = v.properties("hobbies");
+            List<String> hobbiesOutput = new ArrayList<>();
+
+            while (iterator.hasNext()) {
+                VertexProperty<String> property = iterator.next();
+                hobbiesOutput.add(property.value());
+            }
+
+            hobbiesOutput.forEach(System.out::println);
+        });
     }
 }
