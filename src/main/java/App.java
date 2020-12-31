@@ -27,6 +27,7 @@ public class App {
         tinkerGraphVertexCreationIfNotExistsExample();
         tinkerGraphAddingListProperty();
         tinkerGraphAddEdgeBasedOnPropertyValue();
+        tinkerGraphPersistingInJanushGraphThroughGremlin();
     }
 
     /**
@@ -165,6 +166,45 @@ public class App {
             traversalSource.close();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    /**
+     * This method connects to JanushGraph through Gremlin
+     *
+     * JanushGraph implements TinkerPop API. So the graph is accessible through gremlin server.
+     * A docker image for Janush graph is available.
+     *
+     * For more info
+     * see <a href="https://docs.janusgraph.org/getting-started/installation/">installation</a>
+     * also <a href="https://docs.janusgraph.org/connecting/java/">Connecting With Java</a>
+     */
+    private static void tinkerGraphPersistingInJanushGraphThroughGremlin() {
+        try {
+            GraphTraversalSource traversalSource = AnonymousTraversalSource.traversal().withRemote("conf/remote-graph.properties");
+
+            Vertex personVertex = traversalSource.addV("person")
+                    .property("name", "marko")
+                    .property("age", 30)
+                    .next();
+
+            Vertex jobVertex = traversalSource.addV("job")
+                    .property("name", "Software Engineer")
+                    .property("company", "abcdefgh")
+                    .next();
+
+            traversalSource.addE("works").from(personVertex).to(jobVertex).iterate();
+
+            List<Object> outputList = traversalSource.V().has("name", "marko").out("works").values("name").toList();
+
+            for (Object output : outputList) {
+                System.out.println(output);
+            }
+
+            traversalSource.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

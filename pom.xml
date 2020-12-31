@@ -27,6 +27,12 @@
             <artifactId>tinkergraph-gremlin</artifactId>
             <version>3.4.9</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-driver</artifactId>
+            <version>0.5.2</version>
+        </dependency>
     </dependencies>
 
     <build>
